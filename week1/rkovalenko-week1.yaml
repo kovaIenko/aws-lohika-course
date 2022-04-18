@@ -1,0 +1,128 @@
+
+Parameters:
+  VPCParameter:
+    Type: String 
+    Default: vpc-05c9b537de7cb434a
+  KeyNameParameter:
+    Type: String
+    Default: aws
+    Description: name key file param   
+  InstanceTypeParameter:
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - m1.small
+      - m1.large
+    Description: Enter t2.micro, m1.small, or m1.large. Default is t2.micro
+  ImgIdParameter:
+    Type: String
+    Default: ami-00ee4df451840fa9d
+    Description: Img id of instance param      
+Resources:
+  CustomVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: 'true'
+      EnableDnsHostnames: 'true'
+  # Subnet:
+  #   Type: AWS::EC2::Subnet
+  #   Properties:
+  #     VpcId: !Ref CustomVPC
+  #     CidrBlock: 10.0.0.0/24
+  #     AvailabilityZone: !Select [ 1, !GetAZs  '' ] 
+  SSHSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      VpcId: !Ref VPCParameter
+      GroupDescription: Enable SSH access via port 22
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          FromPort: 22
+          IpProtocol: tcp
+          ToPort: 22
+  WebSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      VpcId: !Ref VPCParameter
+      GroupDescription: Enable HTTP access via user defined port
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          FromPort: 80
+          IpProtocol: tcp
+          ToPort: 80
+      SecurityGroupEgress:
+         - CidrIp: 0.0.0.0/0
+           FromPort: 80
+           IpProtocol: tcp
+           ToPort: 80       
+  SimpleASGConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      SecurityGroups: [ !Ref WebSecurityGroup,  !Ref SSHSecurityGroup ]
+      KeyName:
+         Ref: KeyNameParameter
+      ImageId: !Ref ImgIdParameter
+      InstanceType: !Ref InstanceTypeParameter
+      UserData:
+        Fn::Base64: |
+            #!/bin/bash -xe
+            sudo yum -y update
+            sudo yum -y install java-1.8.0-openjdk
+  ASG:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      MinSize: '0'
+      MaxSize: '2'
+      DesiredCapacity: '1'
+      LaunchConfigurationName: !Ref SimpleASGConfig
+      # VPCZoneIdentifier: [!Ref Subnet]
+      AvailabilityZones: ['us-west-2a'] 
+          
+  # Ec2Instance:
+  #   Type: AWS::EC2::Instance
+  #   Metadata: 
+  #     AWS::CloudFormation::Init:
+  #       config: 
+  #         packages: 
+  #           yum:
+  #             - java: []
+  #             - httpd: []
+  #   Properties:
+  #     InstanceType:
+  #         Ref: InstanceTypeParameter
+  #     KeyName:
+  #         Ref: KeyNameParameter
+  #     ImageId: 
+  #         Ref: ImgIdParameter
+  #     SecurityGroupIds:
+  #       - !Ref SSHSecurityGroup
+  #       - !Ref WebSecurityGroup
+  #       - !Ref ServerSecurityGroup
+  #     UserData: !Base64 
+  #         'Fn::Sub':
+  #           - >
+  #             #!/bin/bash -x
+  #             # Install the files and packages from the metadata
+
+  #             /opt/aws/bin/cfn-init -v --stack ${AWS::StackName} --resource Ec2Instance
+  #             --region ${AWS::Region}
+
+  #             # Signal the status from cfn-init
+
+  #             /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource
+  #             Ec2Instance --region ${AWS::Region}
+  #           - {}  
+Outputs:
+  ASGOut: 
+    Description: instance just created id
+    Value: !Ref ASG
+  # InstanceIp:
+  #   Description: instance just created ip
+  #   Value: { "Fn::GetAtt" : [ "Ec2Instance", "PublicIp" ]}
+
+
+
+
+          
