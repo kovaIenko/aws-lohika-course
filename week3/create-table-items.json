@@ -1,0 +1,16 @@
+{
+    "TableName": "items",
+    "KeySchema": [
+      { "AttributeName": "ID", "KeyType": "HASH" },
+      { "AttributeName": "Title", "KeyType": "RANGE"}
+    ],
+    "AttributeDefinitions": [
+      { "AttributeName": "ID", "AttributeType": "N" },
+      { "AttributeName": "Title", "AttributeType": "S" }
+
+    ],
+    "ProvisionedThroughput": {
+      "ReadCapacityUnits": 5,
+      "WriteCapacityUnits": 5
+    }
+}

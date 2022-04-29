@@ -1,0 +1,7 @@
+
+aws s3api create-bucket --bucket rkovalenko-second-bucket  --create-bucket-configuration LocationConstraint=us-west-2
+aws s3 cp create-table-items.json s3://rkovalenko-second-bucket
+aws s3 cp dynamodb-script.sh s3://rkovalenko-second-bucket
+aws s3 cp rds-script.sql s3://rkovalenko-second-bucket
+
+terraform import aws_s3_bucket.s3-last-bucket rkovalenko-second-bucket -lock=false
