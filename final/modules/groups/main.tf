@@ -91,3 +91,12 @@ resource "aws_security_group_rule" "private_in_https" {
   cidr_blocks       = ["10.0.2.0/24", "10.0.5.0/24"]
   security_group_id = aws_security_group.private.id
 }
+
+resource "aws_security_group_rule" "private_in_https" {
+  type              = "ingress"
+  from_port         = 5432
+  to_port           = 5432
+  protocol          = "tcp"
+  cidr_blocks       = ["10.0.2.0/24", "10.0.5.0/24"]
+  security_group_id = aws_security_group.private.id
+}
