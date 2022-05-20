@@ -109,7 +109,6 @@ resource "aws_db_instance" "postgres" {
   engine = "postgres"
   instance_class = "db.t3.micro"
   name = "EduLohikaTrainingAwsRds"
-  db_name = "duLohikaTrainingAwsRds"
   username = "rootuser"
   vpc_security_group_ids = [var.aws_security_group_id]
   password =  "rootuser"

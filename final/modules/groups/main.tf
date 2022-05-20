@@ -92,7 +92,7 @@ resource "aws_security_group_rule" "private_in_https" {
   security_group_id = aws_security_group.private.id
 }
 
-resource "aws_security_group_rule" "private_in_https" {
+resource "aws_security_group_rule" "private_in_rds" {
   type              = "ingress"
   from_port         = 5432
   to_port           = 5432
